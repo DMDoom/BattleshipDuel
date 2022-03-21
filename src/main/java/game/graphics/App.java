@@ -69,17 +69,17 @@ public class App extends Application {
         // Entities
         Entity shipRed = new Ship(WIDTH / 4, HEIGHT / 4, "file:game_redPlayer.png");
         Entity shipBlue = new Ship(WIDTH - 200, HEIGHT - 200, "file:game_bluePlayer.png");
-        Asteroid initialAsteroid = new Asteroid(WIDTH / 2, HEIGHT / 2, "file:game_asteroid.png"); // make it massive and slower
+        //Asteroid initialAsteroid = new Asteroid(WIDTH / 2, HEIGHT / 2, "file:game_asteroid.png"); // make it massive and slower
         
         List<Projectile> projectilesRed = new ArrayList<>();
         List<Projectile> projectilesBlue = new ArrayList<>();
         
         List<Asteroid> asteroids = new ArrayList<>();
-        asteroids.add(initialAsteroid);
+        //asteroids.add(initialAsteroid);
         for (int i = 0; i < 10; i++) {
             Random rnd = new Random();
             Asteroid asteroid = new Asteroid(rnd.nextInt(WIDTH / 3), rnd.nextInt(HEIGHT), "file:game_asteroid_1.png");
-            if (!asteroid.collidesWith(shipRed) || !asteroid.collidesWith(shipBlue)) {
+            if (!asteroid.collidesWith(shipRed) && !asteroid.collidesWith(shipBlue)) {
                 asteroids.add(asteroid);
             }
         }
