@@ -10,42 +10,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import javafx.animation.Animation;
-import javafx.animation.Animation.Status;
 import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.animation.Transition;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
-import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -67,18 +50,16 @@ public class App extends Application {
         System.out.println(screenBounds);
 
         // Entities
-        Entity shipRed = new Ship(WIDTH / 4, HEIGHT / 4, "file:game_redPlayer.png");
-        Entity shipBlue = new Ship(WIDTH - 200, HEIGHT - 200, "file:game_bluePlayer.png");
-        //Asteroid initialAsteroid = new Asteroid(WIDTH / 2, HEIGHT / 2, "file:game_asteroid.png"); // make it massive and slower
+        Entity shipRed = new Ship(WIDTH / 4, HEIGHT / 4, "/game_redPlayer.png");
+        Entity shipBlue = new Ship(WIDTH - 200, HEIGHT - 200, "/game_bluePlayer.png");
         
         List<Projectile> projectilesRed = new ArrayList<>();
         List<Projectile> projectilesBlue = new ArrayList<>();
         
         List<Asteroid> asteroids = new ArrayList<>();
-        //asteroids.add(initialAsteroid);
         for (int i = 0; i < 10; i++) {
             Random rnd = new Random();
-            Asteroid asteroid = new Asteroid(rnd.nextInt(WIDTH / 3), rnd.nextInt(HEIGHT), "file:game_asteroid_1.png");
+            Asteroid asteroid = new Asteroid(rnd.nextInt(WIDTH / 3), rnd.nextInt(HEIGHT), "/game_asteroid_1.png");
             if (!asteroid.collidesWith(shipRed) && !asteroid.collidesWith(shipBlue)) {
                 asteroids.add(asteroid);
             }
@@ -86,24 +67,24 @@ public class App extends Application {
 
         List<Asteroid> rubbles = new ArrayList<>();               
                
-        // Other
+        // Graphic and animation
         List<Image> images = new ArrayList<>();
         for (int i = 1; i < 6; i++) { //should be 7 for full sprite
-            images.add(new Image("file:explosion_" + i + ".png"));
+            images.add(new Image("/explosion_" + i + ".png"));
         }
 
         List<Image> asteroidExplosion = new ArrayList<>();
         for (int i = 1; i < 6; i++) {
-            asteroidExplosion.add(new Image("file:asteroidExplode_" + i + ".png"));
+            asteroidExplosion.add(new Image("/asteroidExplode_" + i + ".png"));
         }
         
         List<Image> transitionExplosion = new ArrayList<>();
         for (int i = 1; i < 5; i++) {
-            transitionExplosion.add(new Image("file:asteroidTransition_" + i + ".png"));
+            transitionExplosion.add(new Image("/asteroidTransition_" + i + ".png"));
         }
         
         // Background
-        BackgroundImage background = new BackgroundImage(new Image("file:game_background.png", WIDTH, HEIGHT, false, true),
+        BackgroundImage background = new BackgroundImage(new Image("/game_background.png", WIDTH, HEIGHT, false, true),
                 BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT);
 
         // Layout
@@ -125,13 +106,12 @@ public class App extends Application {
 
         // Input controller
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        //ScheduledExecutorService executorServiceTest = Executors.newSingleThreadScheduledExecutor();
         
         Map<KeyCode,Boolean> buttonController = new HashMap<>();
         gameScene.setOnKeyPressed((key) -> {
             buttonController.put(key.getCode(), Boolean.TRUE);
             
-            // Bad solution, but I guess it works for now
+            // Avoid burst spamming of projectiles
             if (key.getCode() == KeyCode.ENTER || key.getCode() == KeyCode.SPACE) {
                 executorService.schedule(() -> {
                     buttonController.put(key.getCode(), Boolean.FALSE);
@@ -147,7 +127,7 @@ public class App extends Application {
         new AnimationTimer() {
             @Override
             public void handle(long present) {
-                // Menu WIP
+                // Exit
                 if (buttonController.getOrDefault(KeyCode.ESCAPE, false)) {
                     Platform.exit();
                 }
@@ -166,12 +146,12 @@ public class App extends Application {
                 }
                 
                 if (buttonController.getOrDefault(KeyCode.SHIFT, false)) {
+                    // TODO: Add visual effect for this
                     shipRed.jump();
-                    // Add visual effect for this
                 }                    
                 
                 if (buttonController.getOrDefault(KeyCode.ENTER, false)) {                        
-                    Projectile projectile = new Projectile((int) shipRed.getMiddle().getTranslateX() - 9, (int) shipRed.getMiddle().getTranslateY() - 9, "file:projectile_longRed.png");
+                    Projectile projectile = new Projectile((int) shipRed.getMiddle().getTranslateX() - 9, (int) shipRed.getMiddle().getTranslateY() - 9, "/projectile_longRed.png");
                    
                     projectile.getDisplay().setRotate(shipRed.getDisplay().getRotate());
                     projectile.getBounds().setRotate(shipRed.getDisplay().getRotate());
@@ -204,7 +184,7 @@ public class App extends Application {
                 
                 if (buttonController.getOrDefault(KeyCode.SPACE, false)) {
                     Projectile projectile = new Projectile((int) shipBlue.getDisplay().getTranslateX(),
-                    (int) shipBlue.getDisplay().getTranslateY(), "file:projectile_longBlue.png");
+                    (int) shipBlue.getDisplay().getTranslateY(), "/projectile_longBlue.png");
                     
                     projectile.getDisplay().setRotate(shipBlue.getDisplay().getRotate());
                     
@@ -217,7 +197,7 @@ public class App extends Application {
                     gamePane.getChildren().add(projectile.getDisplay());
                 }
 
-                // Collision check
+                // Red projectile hit detection on asteroids
                 projectilesRed.forEach(projectile -> {
                     asteroids.forEach(asteroid -> {
                         if (projectile.collidesWith(asteroid)) {
@@ -249,17 +229,11 @@ public class App extends Application {
                             exp.setTranslateY(projectile.getMiddle().getTranslateY() - 50);
                             projectileExplode.play();
                         }
-                        
-                        // Create new smaller asteroids if there is a destroyed asteroid
-                        // For some reason, does not ALWAYS spawn new asteroids
-                        
-                        // Try to solve this with the iterator
-                        // Iterate over the list of asteroids, perform this action for every asteroid
-                        // if its not alive, then add newly created asteroids to asteroids
+
                         if (!asteroid.isAlive()) {   
                             Random rnd = new Random();                            
                             Asteroid rubble = new Asteroid((int) asteroid.getMiddle().getTranslateX() - 64 + (10 - rnd.nextInt(20)),
-                            (int) asteroid.getMiddle().getTranslateY() - 64 + (10 - rnd.nextInt(20)), "file:game_asteroid_1.png", false);
+                            (int) asteroid.getMiddle().getTranslateY() - 64 + (10 - rnd.nextInt(20)), "/game_asteroid_1.png", false);
                             
                             rubble.getDisplay().setRotate(projectile.getDisplay().getRotate() + rnd.nextInt(40));
                             
@@ -282,6 +256,7 @@ public class App extends Application {
                     });
                 });
 
+                // Blue projectile hit detection on asteroids
                 projectilesBlue.forEach(projectile -> {
                     asteroids.forEach(asteroid -> {
                         if (projectile.collidesWith(asteroid)) {
@@ -316,7 +291,7 @@ public class App extends Application {
                         if (!asteroid.isAlive()) {
                             Random rnd = new Random();
                             Asteroid rubble = new Asteroid((int) asteroid.getMiddle().getTranslateX() - 64 + (10 - rnd.nextInt(20)),
-                                    (int) asteroid.getMiddle().getTranslateY() - 64 + (10 - rnd.nextInt(20)), "file:game_asteroid_1.png", false);
+                                    (int) asteroid.getMiddle().getTranslateY() - 64 + (10 - rnd.nextInt(20)), "/game_asteroid_1.png", false);
 
                             rubble.getDisplay().setRotate(projectile.getDisplay().getRotate() + rnd.nextInt(40));
 
@@ -333,21 +308,12 @@ public class App extends Application {
 
                             gamePane.getChildren().add(rubble.getDisplay());
                             gamePane.getChildren().add(rubble.getBounds());
-                            // Added to a separate list to avoid concurrent modification error
+
+                            // Add to a separate list to avoid concurrent modification exception
                             rubbles.add(rubble);
                         }
                     });
                 });
-
-                /*
-                projectilesBlue.forEach(projectile -> {
-                    asteroids.forEach(asteroid -> {
-                        if (projectile.collidesWith(asteroid) || projectile.collidesWith(shipRed)) {
-                            projectile.setAlive(false);
-                        }
-                    });
-                });
-                */
                 
                 // Removing dead projectiles
                 projectilesRed.stream()
@@ -375,23 +341,20 @@ public class App extends Application {
                 asteroids.stream()
                         .forEach(asteroid -> {
                             if (asteroid.getLife() == 20 || asteroid.getLife() == 15 || asteroid.getLife() == 10 || asteroid.getLife() == 5) {
-                                // Additional shatter to prevent looped animations
+                                // One additional shatter to prevent looped animations
                                 asteroid.shatter();
-                                // CHECK FOR THE STATUS OF DISPLAY IN 
-                                //ImageView transExp = new ImageView();
                                 Transition transitionExplode = new Transition() {
                                 {
                                 setCycleDuration(Duration.millis(400));
 
                                 setOnFinished(handler -> {
-                                    //gamePane.getChildren().remove(transExp);
                                     asteroid.setAnimationStatus(false);
                                     if (asteroid.getLife() >= 15) {
-                                        asteroid.getDisplay().setImage(new Image("file:game_asteroid_2.png"));
+                                        asteroid.getDisplay().setImage(new Image("/game_asteroid_2.png"));
                                     } else if (asteroid.getLife() > 10) {
-                                        asteroid.getDisplay().setImage(new Image("file:game_asteroid_3.png"));
+                                        asteroid.getDisplay().setImage(new Image("/game_asteroid_3.png"));
                                     } else if (asteroid.getLife() > 5) {
-                                        asteroid.getDisplay().setImage(new Image("file:game_asteroid_4.png"));
+                                        asteroid.getDisplay().setImage(new Image("/game_asteroid_4.png"));
                                     } else {
                                         asteroid.setAlive(false);
                                     }                 
@@ -419,7 +382,7 @@ public class App extends Application {
                             ImageView expAsteroid = new ImageView();
                             Transition asteroidExplode = new Transition() {
                                 {
-                                setCycleDuration(Duration.millis(450)); // total time for animation
+                                setCycleDuration(Duration.millis(450));
 
                                 setOnFinished(handler -> {
                                     gamePane.getChildren().remove(expAsteroid);
@@ -434,12 +397,11 @@ public class App extends Application {
                             };
                             
                             gamePane.getChildren().add(expAsteroid);
-                            
-                            // PERFECT ALIGNMENT!
+
                             expAsteroid.setTranslateX(asteroid.getMiddle().getTranslateX() - 128);
                             expAsteroid.setTranslateY(asteroid.getMiddle().getTranslateY() - 128);
                             
-                            // Remving dead asteroid
+                            // Removing dead asteroids
                             gamePane.getChildren().remove(asteroid.getDisplay());
                             gamePane.getChildren().remove(asteroid.getBounds());
                             
@@ -450,8 +412,7 @@ public class App extends Application {
                 asteroids.removeAll(asteroids.stream()
                         .filter(asteroid -> !asteroid.isAlive())
                         .collect(Collectors.toList()));
-                
-                // This works as intended but I fucking hate it
+
                 for (int i = 0; i < 2; i++) {
                     for (Asteroid placeholder : rubbles) {
                         if (!(asteroids.contains(placeholder))) {
@@ -461,12 +422,12 @@ public class App extends Application {
                     rubbles.clear();
                 }
                 
-                // Updating
+                // Updating projectile positions
                 projectilesRed.forEach((projectile) -> projectile.update());
                 projectilesBlue.forEach((projectile) -> projectile.update());
                 asteroids.forEach((asteroid) -> asteroid.update());
 
-                // Ship with asteroid collision
+                // Stop the application on asteroid collision
                 asteroids.forEach((asteroid) -> {
                     if (asteroid.collidesWith(shipBlue)) {
                         stop();
@@ -477,10 +438,10 @@ public class App extends Application {
                     }
                 });
 
-                // Point count
+                // Projectile hit detection for blue ship
                 projectilesRed.forEach((projectile) -> {
                     if (projectile.collidesWith(shipBlue)) {
-                        // Explosion on collision
+                        // Play explosion animation on hit
                         ImageView exp = new ImageView();
                         Transition projectileExplode = new Transition() {
                             {
@@ -499,17 +460,19 @@ public class App extends Application {
                         };
 
                         gamePane.getChildren().add(exp);
-                        // Tweak this, explosion doesn't draw exactly on the tip of projectile
                         exp.setTranslateX(projectile.getMiddle().getTranslateX() - 50);
                         exp.setTranslateY(projectile.getMiddle().getTranslateY() - 50);
                         projectileExplode.play();
 
                         projectile.setAlive(false);
                         redPoints++;
+
+                        // Print points
                         System.out.println("RED PLAYER POINTS" + redPoints);
                     }
                 });
 
+                // Projectile hit detection for red ship
                 projectilesBlue.forEach((projectile) -> {
                     if (projectile.collidesWith(shipRed)) {
                         // Explosion on collision
