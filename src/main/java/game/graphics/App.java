@@ -468,7 +468,7 @@ public class App extends Application {
                         redPoints++;
 
                         // Print points
-                        System.out.println("RED PLAYER POINTS" + redPoints);
+                        System.out.println("RED PLAYER POINTS: " + redPoints);
                     }
                 });
 
@@ -501,9 +501,17 @@ public class App extends Application {
 
                         projectile.setAlive(false);
                         bluePoints++;
-                        System.out.println("RED PLAYER POINTS" + bluePoints);
+                        System.out.println("RED PLAYER POINTS: " + bluePoints);
                     }
                 });
+
+                if (bluePoints >= 10) {
+                    stop();
+                }
+
+                if (redPoints >= 10) {
+                    stop();
+                }
 
                 shipRed.update();
                 shipBlue.update();
